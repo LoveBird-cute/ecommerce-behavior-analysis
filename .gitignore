@@ -205,3 +205,10 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# 데이터 파일
+data/raw/*.csv
+data/raw/*.xlsx
+
+# VSCode 설정
+.vscode/

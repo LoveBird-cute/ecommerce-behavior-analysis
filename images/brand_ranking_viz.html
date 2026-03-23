@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Top 10 브랜드 분석</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            padding: 20px;
+        }
+        
+        .download-buttons {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .download-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            transition: transform 0.2s;
+        }
+        
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+        
+        #captureArea {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 50px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            font-size: 2.8em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 1.3em;
+            font-weight: 400;
+        }
+        
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+        
+        .chart-box {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .chart-title {
+            font-size: 1.5em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        
+        .full-width {
+            grid-column: 1 / -1;
+        }
+        
+        .ranking-flow {
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            padding: 40px;
+            border-radius: 15px;
+            margin-bottom: 40px;
+        }
+        
+        .flow-title {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .flow-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 30px;
+        }
+        
+        .year-column {
+            flex: 1;
+        }
+        
+        .year-header {
+            text-align: center;
+            font-size: 1.8em;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .rank-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            margin: 8px 0;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+            transition: transform 0.2s;
+        }
+        
+        .rank-item:hover {
+            transform: translateX(5px);
+        }
+        
+        .rank-number {
+            font-size: 1.4em;
+            font-weight: 700;
+            color: #667eea;
+            width: 40px;
+            text-align: center;
+        }
+        
+        .brand-info {
+            flex: 1;
+            margin-left: 15px;
+        }
+        
+        .brand-name {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        
+        .brand-sales {
+            font-size: 0.95em;
+            color: #27ae60;
+            font-weight: 500;
+        }
+        
+        .arrow-section {
+            display: flex;
+            flex-direction: column;
+            gap: 23px;
+            padding-top: 68px;
+        }
+        
+        .arrow {
+            font-size: 2em;
+            color: #95a5a6;
+            text-align: center;
+            height: 57px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .arrow.up {
+            color: #27ae60;
+        }
+        
+        .arrow.down {
+            color: #e74c3c;
+        }
+        
+        .arrow.new {
+            color: #3498db;
+        }
+        
+        .insights-box {
+            background: linear-gradient(135deg, #667eea10 0%, #764ba210 100%);
+            padding: 35px;
+            border-radius: 15px;
+            border-left: 5px solid #667eea;
+        }
+        
+        .insights-title {
+            font-size: 1.6em;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        
+        .insight-item {
+            padding: 12px 0;
+            color: #34495e;
+            font-size: 1.05em;
+            line-height: 1.6;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        
+        .insight-item:last-child {
+            border-bottom: none;
+        }
+        
+        .insight-item strong {
+            color: #667eea;
+            font-weight: 600;
+        }
+        
+        .highlight-green {
+            color: #27ae60;
+            font-weight: 600;
+        }
+        
+        .highlight-red {
+            color: #e74c3c;
+            font-weight: 600;
+        }
+        
+        .highlight-blue {
+            color: #3498db;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="download-buttons">
+        <button class="download-btn" onclick="downloadImage()">📸 PNG로 저장</button>
+    </div>
+    
+    <div id="captureArea">
+        <div class="header">
+            <h1>🏆 Top 10 네일 브랜드 순위 분석</h1>
+            <p class="subtitle">2019-2020 연도별 월평균 매출액 비교</p>
+        </div>
+        
+        <div class="ranking-flow">
+            <h2 class="flow-title">순위 변동 흐름도</h2>
+            <div class="flow-container">
+                <div class="year-column">
+                    <div class="year-header">2019년</div>
+                    <div id="ranks2019"></div>
+                </div>
+                
+                <div class="arrow-section" id="arrows"></div>
+                
+                <div class="year-column">
+                    <div class="year-header">2020년</div>
+                    <div id="ranks2020"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="main-grid">
+            <div class="chart-box">
+                <h3 class="chart-title">2019년 매출 순위</h3>
+                <canvas id="chart2019"></canvas>
+            </div>
+            
+            <div class="chart-box">
+                <h3 class="chart-title">2020년 매출 순위</h3>
+                <canvas id="chart2020"></canvas>
+            </div>
+            
+            <div class="chart-box full-width">
+                <h3 class="chart-title">브랜드별 매출 증감률</h3>
+                <canvas id="growthChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="insights-box">
+            <h3 class="insights-title">📊 핵심 인사이트</h3>
+            <div class="insight-item">
+                <strong>runail</strong>: 2년 연속 압도적 1위 ($68,825 → $68,478), 시장 지배력 유지
+            </div>
+            <div class="insight-item">
+                <strong>grattol</strong>: <span class="highlight-green">+15% 성장</span>으로 2위 입지 강화 ($50,237 → $57,792)
+            </div>
+            <div class="insight-item">
+                <strong>estel</strong>: <span class="highlight-green">10위 → 7위 급상승</span>, 브랜드 영향력 강화
+            </div>
+            <div class="insight-item">
+                <strong>italwax</strong>: <span class="highlight-blue">신규 Top 10 진입</span>, 신흥 강자 등장
+            </div>
+            <div class="insight-item">
+                <strong>irisk, strong, masura</strong>: 순위 유지 및 안정적 성장세
+            </div>
+            <div class="insight-item">
+                <strong>cnd, jessnail</strong>: <span class="highlight-red">순위 하락</span>, 경쟁 심화로 시장 점유율 감소
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const data = [
+            {brand: 'runail', rank2019: 1, sales2019: 68825, rank2020: 1, sales2020: 68478},
+            {brand: 'grattol', rank2019: 2, sales2019: 50237, rank2020: 2, sales2020: 57792},
+            {brand: 'irisk', rank2019: 3, sales2019: 42609, rank2020: 3, sales2020: 48036},
+            {brand: 'uno', rank2019: 4, sales2019: 38475, rank2020: 4, sales2020: 37646},
+            {brand: 'strong', rank2019: 5, sales2019: 30044, rank2020: 5, sales2020: 30903},
+            {brand: 'masura', rank2019: 6, sales2019: 28044, rank2020: 6, sales2020: 27815},
+            {brand: 'jessnail', rank2019: 7, sales2019: 27902, rank2020: 8, sales2020: 25533},
+            {brand: 'cnd', rank2019: 8, sales2019: 26206, rank2020: null, sales2020: null},
+            {brand: 'ingarden', rank2019: 9, sales2019: 25221, rank2020: 9, sales2020: 24470},
+            {brand: 'estel', rank2019: 10, sales2019: 23457, rank2020: 7, sales2020: 25707},
+            {brand: 'italwax', rank2019: null, sales2019: null, rank2020: 10, sales2020: 20591}
+        ];
+        
+        // 순위 플로우 생성
+        const brands2019 = data.filter(d => d.rank2019).sort((a, b) => a.rank2019 - b.rank2019);
+        const brands2020 = data.filter(d => d.rank2020).sort((a, b) => a.rank2020 - b.rank2020);
+        
+        const ranks2019 = document.getElementById('ranks2019');
+        brands2019.forEach(item => {
+            ranks2019.innerHTML += `
+                <div class="rank-item">
+                    <div class="rank-number">${item.rank2019}</div>
+                    <div class="brand-info">
+                        <div class="brand-name">${item.brand}</div>
+                        <div class="brand-sales">$${item.sales2019.toLocaleString()}</div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        const ranks2020 = document.getElementById('ranks2020');
+        brands2020.forEach(item => {
+            ranks2020.innerHTML += `
+                <div class="rank-item">
+                    <div class="rank-number">${item.rank2020}</div>
+                    <div class="brand-info">
+                        <div class="brand-name">${item.brand}</div>
+                        <div class="brand-sales">$${item.sales2020.toLocaleString()}</div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        // 화살표 생성
+        const arrows = document.getElementById('arrows');
+        brands2020.forEach(item => {
+            const item2019 = data.find(d => d.brand === item.brand);
+            let arrowHtml = '';
+            
+            if (!item2019.rank2019) {
+                arrowHtml = '<div class="arrow new">🆕</div>';
+            } else if (item2019.rank2019 === item.rank2020) {
+                arrowHtml = '<div class="arrow">→</div>';
+            } else if (item2019.rank2019 > item.rank2020) {
+                arrowHtml = `<div class="arrow up">↗ ${item2019.rank2019 - item.rank2020}</div>`;
+            } else {
+                arrowHtml = `<div class="arrow down">↘ ${item.rank2020 - item2019.rank2019}</div>`;
+            }
+            
+            arrows.innerHTML += arrowHtml;
+        });
+        
+        // 2019년 차트
+        new Chart(document.getElementById('chart2019'), {
+            type: 'bar',
+            data: {
+                labels: brands2019.map(d => d.brand),
+                datasets: [{
+                    label: '월평균 매출액 ($)',
+                    data: brands2019.map(d => d.sales2019),
+                    backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                    borderColor: 'rgba(102, 126, 234, 1)',
+                    borderWidth: 2,
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {display: false}
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: v => '$' + (v/1000).toFixed(0) + 'K'
+                        }
+                    }
+                }
+            }
+        });
+        
+        // 2020년 차트
+        new Chart(document.getElementById('chart2020'), {
+            type: 'bar',
+            data: {
+                labels: brands2020.map(d => d.brand),
+                datasets: [{
+                    label: '월평균 매출액 ($)',
+                    data: brands2020.map(d => d.sales2020),
+                    backgroundColor: 'rgba(118, 75, 162, 0.8)',
+                    borderColor: 'rgba(118, 75, 162, 1)',
+                    borderWidth: 2,
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {display: false}
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: v => '$' + (v/1000).toFixed(0) + 'K'
+                        }
+                    }
+                }
+            }
+        });
+        
+        // 성장률 차트
+        const growthData = data
+            .filter(d => d.sales2019 && d.sales2020)
+            .map(d => ({
+                brand: d.brand,
+                growth: ((d.sales2020 - d.sales2019) / d.sales2019 * 100)
+            }))
+            .sort((a, b) => b.growth - a.growth);
+        
+        new Chart(document.getElementById('growthChart'), {
+            type: 'bar',
+            data: {
+                labels: growthData.map(d => d.brand),
+                datasets: [{
+                    label: '성장률 (%)',
+                    data: growthData.map(d => d.growth),
+                    backgroundColor: growthData.map(d => 
+                        d.growth > 0 ? 'rgba(46, 204, 113, 0.8)' : 'rgba(231, 76, 60, 0.8)'
+                    ),
+                    borderColor: growthData.map(d => 
+                        d.growth > 0 ? 'rgba(46, 204, 113, 1)' : 'rgba(231, 76, 60, 1)'
+                    ),
+                    borderWidth: 2,
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                indexAxis: 'y',
+                plugins: {
+                    legend: {display: false}
+                },
+                scales: {
+                    x: {
+                        ticks: {
+                            callback: v => v.toFixed(1) + '%'
+                        }
+                    }
+                }
+            }
+        });
+        
+        // PNG 다운로드 함수
+        async function downloadImage() {
+            const element = document.getElementById('captureArea');
+            const buttons = document.querySelector('.download-buttons');
+            
+            // 버튼 임시 숨김
+            buttons.style.display = 'none';
+            
+            try {
+                const canvas = await html2canvas(element, {
+                    scale: 2,
+                    backgroundColor: '#ffffff',
+                    logging: false,
+                    useCORS: true
+                });
+                
+                const link = document.createElement('a');
+                link.download = 'Top10_브랜드_분석_2019-2020.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            } catch (error) {
+                alert('이미지 생성 중 오류가 발생했습니다.');
+                console.error(error);
+            } finally {
+                // 버튼 다시 표시
+                buttons.style.display = 'flex';
+            }
+        }
+    </script>
+</body>
+</html>
